@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Script Shredder - Professional Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body class="bg-zinc-950 text-white p-8">
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold italic text-purple-500">SCRIPT SHREDDER</h1>
+            <div class="flex gap-4">
+                <button id="zipBtn" onclick="downloadAllAsZip()" class="hidden bg-green-600 hover:bg-green-500 px-6 py-2 rounded-lg font-bold transition-all">
+                    DOWNLOAD ALL (.ZIP)
+                </button>
+                <a href="index.html" class="bg-zinc-800 px-4 py-2 rounded-lg text-sm hover:bg-zinc-700">← Back</a>
+            </div>
+        </div>
+
+        <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 mb-8">
+            <label class="block text-xs font-bold text-zinc-500 uppercase mb-2">Paste Full Ad Script</label>
+            <textarea id="fullScript" rows="10" class="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 text-zinc-300" placeholder="Paste your script here..."></textarea>
+            
+            <button onclick="shredAndGen()" id="actionBtn" class="w-full bg-purple-600 hover:bg-purple-500 mt-6 py-4 rounded-xl font-black text-lg transition-all shadow-lg">
+                SHRED & START GENERATION
+            </button>
+        </div>
+
+        <h2 class="text-xl font-bold mb-4 px-2">Generated Clips</h2>
+        <div id="clipsContainer" class="space-y-3">
+            <p class="text-zinc-600 px-2 italic text-sm">Waiting for script...</p>
+        </div>
+    </div>
+
+    <script>
+        const HARDCODED_VOICE = "moss_audio_567f5b7d-fdf2-11f0-acd1-ae8d6efa85ff";
+        let generatedBlobs = []; // Stores audio for the ZIP
+
+        async function shredAndGen() {
+            const script = document.getElementById('fullScript').value;
+            const btn = document.getElementById('actionBtn');
+            const container = document.getElementById('clipsContainer');
+            
+            if (!script) return alert("Paste a script!");
+            
+            btn.disabled = true;
+            btn.innerText = "GEMINI IS SLICING...";
+            container.innerHTML = ""; 
+            generatedBlobs = []; 
+            document.getElementById('zipBtn').classList.add('hidden');
+
+            try {
+                const shredRes = await fetch('/shred-script', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ script })
+                });
+                const chunks = await shredRes.json();
+
+                btn.innerText = `GENERATING ${chunks.length} CLIPS...`;
+
+                for (let i = 0; i < chunks.length; i++) {
+                    const row = document.createElement('div');
+                    row.className = "bg-zinc-900 p-5 rounded-xl border border-zinc-800 flex flex-col md:flex-row items-center gap-4";
+                    row.innerHTML = `
+                        <div class="flex-grow">
+                            <div class="text-[10px] text-purple-500 font-bold mb-1 uppercase">Segment ${i+1}</div>
+                            <p class="text-sm text-zinc-300 italic">"${chunks[i]}"</p>
+                        </div>
+                        <div id="status-${i}" class="flex items-center gap-3 min-w-[300px] justify-end">
+                            <span class="text-xs text-zinc-600 animate-pulse">Synthesizing...</span>
+                        </div>
+                    `;
+                    container.appendChild(row);
+
+                    // Call TTS
+                    fetch('/generate-audio', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ 
+                            text: chunks[i], 
+                            model: "speech-2.8-hd", 
+                            voice_id: HARDCODED_VOICE 
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.data) {
+                            const hex = result.data.audio;
+                            const bytes = new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                            const blob = new Blob([bytes], {type: 'audio/mp3'});
+                            const url = URL.createObjectURL(blob);
+                            
+                            // Save for ZIP
+                            generatedBlobs.push({ name: `clip_${i+1}.mp3`, blob: blob });
+
+                            document.getElementById(`status-${i}`).innerHTML = `
+                                <audio controls src="${url}" class="h-8 w-48"></audio>
+                                <a href="${url}" download="clip_${i+1}.mp3" class="bg-blue-600 hover:bg-blue-500 p-2 px-4 rounded text-[10px] font-bold">MP3</a>
+                            `;
+
+                            // Show Zip button when first one finishes
+                            document.getElementById('zipBtn').classList.remove('hidden');
+                        }
+                    });
+                }
+            } catch (err) {
+                alert("Fail: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "SHRED & START GENERATION";
+            }
+        }
+
+        async function downloadAllAsZip() {
+            const zip = new JSZip();
+            generatedBlobs.forEach(item => {
+                zip.file(item.name, item.blob);
+            });
+
+            const content = await zip.generateAsync({type: "blob"});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `Ad_Campaign_${Date.now()}.zip`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
