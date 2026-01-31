@@ -2,33 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MiniMax 2.8 Expressive Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8">
-        <h1 class="text-3xl font-black mb-2 text-blue-500">VOICE GEN PRO</h1>
-        <p class="text-slate-400 mb-8">MiniMax 2.8/2.6 Marketing Asset Suite</p>
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 relative">
+        
+        <a href="index.html" class="absolute top-8 right-8 text-slate-500 hover:text-white text-sm bg-slate-800 px-3 py-1 rounded-md transition-all">
+            ← Hub
+        </a>
+
+        <h1 class="text-3xl font-black mb-2 text-blue-500 italic">VOICE GEN PRO</h1>
+        <p class="text-slate-400 mb-8 font-medium">MiniMax 2.8/2.6 Manual Fine-Tuning</p>
 
         <div class="space-y-6">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="text-xs uppercase font-bold text-slate-500">Select Model</label>
-                    <select id="model" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <select id="model" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                         <option value="speech-2.8-hd">speech-2.8-hd (Ultra Realistic)</option>
                         <option value="speech-2.6-hd">speech-2.6-hd (Stable)</option>
                     </select>
                 </div>
                 <div>
                     <label class="text-xs uppercase font-bold text-slate-500">Voice ID</label>
-                    <input type="text" id="voiceId" value="moss_audio_567f5b7d-fdf2-11f0-acd1-ae8d6efa85ff" readonly class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mt-1 outline-none text-slate-400">
+                    <input type="text" id="voiceId" value="moss_audio_567f5b7d-fdf2-11f0-acd1-ae8d6efa85ff" readonly class="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 mt-1 outline-none text-slate-500 cursor-not-allowed">
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="text-xs uppercase font-bold text-slate-500">Emotional Tone</label>
-                    <select id="emotion" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mt-1 outline-none">
+                    <select id="emotion" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mt-1 outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="happy">Happy / Energetic</option>
                         <option value="sad">Sad / Empathetic</option>
                         <option value="angry">Angry / Bold</option>
@@ -37,24 +43,24 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs uppercase font-bold text-slate-500">Speed</label>
-                    <input type="number" id="speed" value="1.0" step="0.1" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mt-1 outline-none">
+                    <label class="text-xs uppercase font-bold text-slate-500">Speed (0.5 - 2.0)</label>
+                    <input type="number" id="speed" value="1.0" step="0.1" min="0.5" max="2.0" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mt-1 outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
 
             <div>
-                <label class="text-xs uppercase font-bold text-slate-500">Ad Script (Supports Interjections)</label>
-                <textarea id="text" rows="4" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-4 mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Omg(sighs), I can't believe..."></textarea>
-                <p class="text-[10px] text-slate-500 mt-2">Use tags like (laughs), (sighs), or (breath) for the 2.8-hd model.</p>
+                <label class="text-xs uppercase font-bold text-slate-500">Single Line Script</label>
+                <textarea id="text" rows="4" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-4 mt-1 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Enter the specific line you want to fine-tune..."></textarea>
+                <p class="text-[10px] text-slate-500 mt-2">Expert tip: Use interjections like (sighs) or (laughs) to add human emotion.</p>
             </div>
 
-            <button onclick="generateVoice()" id="genBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-lg transition-all transform active:scale-95">
+            <button onclick="generateVoice()" id="genBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-lg transition-all transform active:scale-[0.97] shadow-lg shadow-blue-900/30">
                 GENERATE ASSET
             </button>
 
-            <div id="result" class="hidden mt-8 p-4 bg-slate-800 rounded-xl border border-blue-500/30">
+            <div id="result" class="hidden mt-8 p-6 bg-slate-950/50 rounded-xl border border-blue-500/30 animate-in fade-in zoom-in duration-300">
                 <audio id="player" controls class="w-full mb-4"></audio>
-                <a id="download" class="block text-center text-sm text-blue-400 hover:underline">Download MP3</a>
+                <a id="download" class="block bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-center text-sm text-blue-400 font-bold transition-colors">Download MP3</a>
             </div>
         </div>
     </div>
@@ -62,25 +68,33 @@
     <script>
         async function generateVoice() {
             const btn = document.getElementById('genBtn');
+            const resultDiv = document.getElementById('result');
+            const text = document.getElementById('text').value;
+
+            if (!text) return alert("Please enter some text!");
+
             btn.disabled = true;
             btn.innerText = "SYNTHESIZING...";
+            resultDiv.classList.add('hidden');
 
             const data = {
                 model: document.getElementById('model').value,
                 voice_id: "moss_audio_567f5b7d-fdf2-11f0-acd1-ae8d6efa85ff",
-                text: document.getElementById('text').value,
+                text: text,
                 emotion: document.getElementById('emotion').value,
                 speed: document.getElementById('speed').value
             };
 
             try {
-                const response = await fetch('http://localhost:3000/generate-audio', {
+                // UPDATED: Using relative path '/generate-audio' for Render compatibility
+                const response = await fetch('/generate-audio', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
                 const json = await response.json();
+                
                 if (json.data && json.data.audio) {
                     const hex = json.data.audio;
                     const bytes = new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
@@ -89,13 +103,13 @@
 
                     document.getElementById('player').src = url;
                     document.getElementById('download').href = url;
-                    document.getElementById('download').download = `ad_voice_${Date.now()}.mp3`;
-                    document.getElementById('result').classList.remove('hidden');
+                    document.getElementById('download').download = `manual_voice_${Date.now()}.mp3`;
+                    resultDiv.classList.remove('hidden');
                 } else {
-                    alert("API Error: " + (json.error || "Unknown"));
+                    alert("API Error: " + (json.error || "Generation failed. Check server logs."));
                 }
             } catch (e) {
-                alert("Connection failed: " + e.message);
+                alert("Connection failed: Could not reach the server.");
             } finally {
                 btn.disabled = false;
                 btn.innerText = "GENERATE ASSET";
