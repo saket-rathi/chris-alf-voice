@@ -8,8 +8,8 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(__dirname));
 
-const MINIMAX_KEY = "sk-api-quS8Bra8G2dfsVg38YjoqcOy5uHRHHnVaF5L66hkSmhXyaeb1_2c26drMBP9IJP-GYF5mzM2WPnRazl-r-dZXfXnGviwo0enegYbq41V33Nc19XU9j6B5Hw";
-const GEMINI_KEY = "AIzaSyDeYmgCHkyNh5lYgNS7IQqzNUB8uoLRgIU"; 
+const MINIMAX_KEY = process.env.MINIMAX_KEY;
+const GEMINI_KEY = process.env.GEMINI_KEY;
 
 // ROUTE: Shred Script with Gemini (Strict Mode)
 // UPDATED: Gemini 3 Pro
@@ -65,4 +65,5 @@ app.post('/generate-audio', async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log('Server running: http://localhost:3000'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
