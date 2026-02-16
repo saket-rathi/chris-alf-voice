@@ -1,0 +1,5 @@
+node_modules/
+.env
+generated-audio/*.mp3
+*.log
+.DS_Store
